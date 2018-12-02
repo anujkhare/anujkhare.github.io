@@ -18,6 +18,12 @@
   </url>
   
   <url>
+    <loc>https://anujkhare.github.io/</loc>
+    <lastmod>2018-09-12T14:51:12+06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://anujkhare.github.io/blog/</loc>
     <lastmod>2018-09-12T14:51:12+06:00</lastmod>
     <priority>0</priority>
@@ -25,12 +31,6 @@
   
   <url>
     <loc>https://anujkhare.github.io/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://anujkhare.github.io/</loc>
-    <lastmod>2018-09-12T14:51:12+06:00</lastmod>
     <priority>0</priority>
   </url>
   
