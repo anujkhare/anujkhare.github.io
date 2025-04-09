@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Jax | Anuj&#39;s Blog</title>
-<meta name="keywords" content="">
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="canonical" href="https://anujkhare.github.io/tags/jax/">
+<title>Toy Jax Framework | Anuj&#39;s Blog</title>
+<meta name="keywords" content="jax, from scratch">
+<meta name="description" content="A simple NN framework in jax.">
+<meta name="author" content="Anuj Khare">
+<link rel="canonical" href="https://anujkhare.github.io/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://anujkhare.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://anujkhare.github.io/favicon-16x16.png">
@@ -18,8 +18,7 @@
 <link rel="mask-icon" href="https://anujkhare.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://anujkhare.github.io/tags/jax/index.xml">
-<link rel="alternate" hreflang="en" href="https://anujkhare.github.io/tags/jax/">
+<link rel="alternate" hreflang="en" href="https://anujkhare.github.io/posts/001.-toy-jax-framework/">
 <noscript>
     <style>
         #theme-toggle,
@@ -56,18 +55,83 @@
         }
 
     </style>
-</noscript><meta property="og:url" content="https://anujkhare.github.io/tags/jax/">
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<meta property="og:url" content="https://anujkhare.github.io/posts/001.-toy-jax-framework/">
   <meta property="og:site_name" content="Anuj&#39;s Blog">
-  <meta property="og:title" content="Jax">
+  <meta property="og:title" content="Toy Jax Framework">
+  <meta property="og:description" content="A simple NN framework in jax.">
   <meta property="og:locale" content="en-us">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-06T17:42:57+01:00">
+    <meta property="article:modified_time" content="2025-04-06T17:42:57+01:00">
+    <meta property="article:tag" content="Jax">
+    <meta property="article:tag" content="From Scratch">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Jax">
-<meta name="twitter:description" content="">
+<meta name="twitter:title" content="Toy Jax Framework">
+<meta name="twitter:description" content="A simple NN framework in jax.">
 
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://anujkhare.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Toy Jax Framework",
+      "item": "https://anujkhare.github.io/posts/001.-toy-jax-framework/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Toy Jax Framework",
+  "name": "Toy Jax Framework",
+  "description": "A simple NN framework in jax.",
+  "keywords": [
+    "jax", "from scratch"
+  ],
+  "articleBody": "Below is the general formulation of an attention mechanism:\n$$ \\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right)V $$\nWhere:\n( Q ) is the query matrix, ( K ) is the key matrix, ( V ) is the value matrix, ( d_k ) is the dimensionality of the key vectors. ",
+  "wordCount" : "48",
+  "inLanguage": "en",
+  "datePublished": "2025-04-06T17:42:57+01:00",
+  "dateModified": "2025-04-06T17:42:57+01:00",
+  "author":{
+    "@type": "Person",
+    "name": "Anuj Khare"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://anujkhare.github.io/posts/001.-toy-jax-framework/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Anuj's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://anujkhare.github.io/favicon.ico"
+    }
+  }
+}
+</script>
 </head>
 
-<body class="list" id="top">
+<body class="" id="top">
 <script>
     if (localStorage.getItem("pref-theme") === "dark") {
         document.body.classList.add('dark');
@@ -110,39 +174,51 @@
         </ul>
     </nav>
 </header>
-<main class="main"> 
-<header class="page-header">
-  <h1>
-    Jax
-  </h1>
-</header>
+<main class="main">
 
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Toy Jax Framework
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Below is the general formulation of an attention mechanism:
-$$ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$
-Where:
-( Q ) is the query matrix, ( K ) is the key matrix, ( V ) is the value matrix, ( d_k ) is the dimensionality of the key vectors. </p>
-  </div>
-  <footer class="entry-footer"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;48 words&nbsp;·&nbsp;Anuj Khare</footer>
-  <a class="entry-link" aria-label="post link to Toy Jax Framework" href="https://anujkhare.github.io/posts/001.-toy-jax-framework/"></a>
-</article>
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://anujkhare.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://anujkhare.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Toy Jax Framework
+    </h1>
+    <div class="post-description">
+      A simple NN framework in jax.
+    </div>
+    <div class="post-meta"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;48 words&nbsp;·&nbsp;Anuj Khare
 
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">NN from scratch series
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>I have been meaning for a long time to implement (toy versions of) some of the state-of-the-art ML models from scratch. The motivation is to increase my depth of understanding of these ML techniques and also foray into some advanced / esoteric details. This is also directly relevant to my current professional role. While I never need to implement a neural network from scratch, we routinely build new ML models or modify the architectures of existing ones for new applications. A deeper understanding of how the various components of the model function - while not strictly necessary - is immensely helpful. It is also a fun little side project :)
-...</p>
+</div>
+  </header> 
+
+  <div class="post-content"><p>Below is the general formulation of an attention mechanism:</p>
+<p>$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+$$</p>
+<p>Where:</p>
+<ul>
+<li>( Q ) is the query matrix,</li>
+<li>( K ) is the key matrix,</li>
+<li>( V ) is the value matrix,</li>
+<li>( d_k ) is the dimensionality of the key vectors.</li>
+</ul>
+
+
   </div>
-  <footer class="entry-footer"><span title='2025-04-06 15:06:41 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;295 words&nbsp;·&nbsp;anujkhare</footer>
-  <a class="entry-link" aria-label="post link to NN from scratch series" href="https://anujkhare.github.io/posts/000.-from-scratch-series/"></a>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://anujkhare.github.io/tags/jax/">Jax</a></li>
+      <li><a href="https://anujkhare.github.io/tags/from-scratch/">From Scratch</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://anujkhare.github.io/posts/000.-from-scratch-series/">
+    <span class="title">Next »</span>
+    <br>
+    <span>NN from scratch series</span>
+  </a>
+</nav>
+
+  </footer>
 </article>
     </main>
     

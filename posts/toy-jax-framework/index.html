@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex, nofollow">
-<title>Toy Jax Framework | Practical ML</title>
+<title>Toy Jax Framework | Anuj&#39;s Blog</title>
 <meta name="keywords" content="jax, from scratch">
 <meta name="description" content="A simple NN framework in jax.">
 <meta name="author" content="Anuj Khare">
-<link rel="canonical" href="https://canonical.url/to/page">
+<link rel="canonical" href="https://anujkhare.github.io/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
@@ -56,6 +56,11 @@
 
     </style>
 </noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
 </head>
 
 <body class="" id="top">
@@ -73,7 +78,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="Practical ML (Alt + H)">Practical ML</a>
+            <a href="http://localhost:1313/" accesskey="h" title="Anuj&#39;s Blog (Alt + H)">Anuj&#39;s Blog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -112,16 +117,22 @@
     <div class="post-description">
       A simple NN framework in jax.
     </div>
-    <div class="post-meta"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;270 words&nbsp;·&nbsp;Anuj Khare
+    <div class="post-meta"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;48 words&nbsp;·&nbsp;Anuj Khare
 
 </div>
   </header> 
 
-  <div class="post-content"><p>I have been meaning for a long time to implement (toy versions of) some of the state-of-the-art ML models from scratch. The motivation is to get increase my depth of understanding of these ML techniques and also foray into some advanced / esoteric details. This is also directly relevant to my current professional role. While I never need to implement a neural network from scratch, we routinely build new ML models or modify the architectures of existing ones for new applications. A deeper understanding of how the various components of the model function - while not strictly necessary - is immensely helpful. It is also a fun little side project :)</p>
-<p>There are many great tutorials for learning jax and about various ML models online. I follow various tutorials through this series and will cite them as necessary.</p>
-<p>The goal here is to build many of the model components from scratch - while relying on the core jax APIs - including the <a href="">jax.nn</a> utilities. Additionally, we rely on existing libraries for dataset utilities, optimizers (<a href="">optax</a>), etc.
-Crucially, we don&rsquo;t use any existing NN framework. <a href="https://github.com/google/flax">Flax</a> is the probably the most popular open source jax framework at the moment. <a href="https://github.com/patrick-kidger/equinox">Equinox</a> is a great, light-weight, neural-networks library. From their Github page - <em>Equinox (a) offers a lot of advanced features not found in [Flax / Haiku], like PyTree manipulation or runtime errors; (b) has a simpler way of building models: they&rsquo;re just PyTrees, so they can pass across JIT/grad/etc. boundaries smoothly.</em></p>
-<p>For the modules in this series, we closely follow the design philosohpy of equinox, but make many simplifying assumptions. This reduces</p>
+  <div class="post-content"><p>Below is the general formulation of an attention mechanism:</p>
+<p>$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+$$</p>
+<p>Where:</p>
+<ul>
+<li>( Q ) is the query matrix,</li>
+<li>( K ) is the key matrix,</li>
+<li>( V ) is the value matrix,</li>
+<li>( d_k ) is the dimensionality of the key vectors.</li>
+</ul>
 
 
   </div>
@@ -144,7 +155,7 @@ Crucially, we don&rsquo;t use any existing NN framework. <a href="https://github
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/">Practical ML</a></span> · 
+        <span>&copy; 2025 <a href="http://localhost:1313/">Anuj&#39;s Blog</a></span> · 
 
     <span>
         Powered by
