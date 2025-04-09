@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>From Scratch on Anuj&#39;s Blog</title>
+    <title>From-Scratch on Anuj&#39;s Blog</title>
     <link>https://anujkhare.github.io/tags/from-scratch/</link>
-    <description>Recent content in From Scratch on Anuj&#39;s Blog</description>
+    <description>Recent content in From-Scratch on Anuj&#39;s Blog</description>
     <generator>Hugo -- 0.145.0</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 06 Apr 2025 17:42:57 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 06 Apr 2025 15:06:41 +0100</lastBuildDate>
     <atom:link href="https://anujkhare.github.io/tags/from-scratch/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Toy Jax Framework</title>
-      <link>https://anujkhare.github.io/posts/001.-toy-jax-framework/</link>
-      <pubDate>Sun, 06 Apr 2025 17:42:57 +0100</pubDate>
-      <guid>https://anujkhare.github.io/posts/001.-toy-jax-framework/</guid>
-      <description>A simple NN framework in jax.</description>
-    </item>
     <item>
       <title>NN from scratch series</title>
       <link>https://anujkhare.github.io/posts/000.-from-scratch-series/</link>
