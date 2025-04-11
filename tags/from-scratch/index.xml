@@ -10,16 +10,16 @@
     <atom:link href="https://anujkhare.github.io/tags/from-scratch/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Toy Jax Framework</title>
-      <link>https://anujkhare.github.io/posts/001.-toy-jax-framework/</link>
+      <link>https://anujkhare.github.io/posts/001-toy-jax-framework/</link>
       <pubDate>Sun, 06 Apr 2025 17:42:57 +0100</pubDate>
-      <guid>https://anujkhare.github.io/posts/001.-toy-jax-framework/</guid>
+      <guid>https://anujkhare.github.io/posts/001-toy-jax-framework/</guid>
       <description>A simple NN framework in jax.</description>
     </item>
     <item>
       <title>NN from scratch series</title>
-      <link>https://anujkhare.github.io/posts/000.-from-scratch-series/</link>
+      <link>https://anujkhare.github.io/posts/000-from-scratch-series/</link>
       <pubDate>Sun, 06 Apr 2025 15:06:41 +0100</pubDate>
-      <guid>https://anujkhare.github.io/posts/000.-from-scratch-series/</guid>
+      <guid>https://anujkhare.github.io/posts/000-from-scratch-series/</guid>
       <description>Introduction to a series on implementing neural networks from scratch in jax.</description>
     </item>
   </channel>

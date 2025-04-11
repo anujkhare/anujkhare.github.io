@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Toy Jax Framework | Anuj&#39;s Blog</title>
+<meta name="keywords" content="jax, from scratch">
+<meta name="description" content="A simple NN framework in jax.">
+<meta name="author" content="Anuj Khare">
+<link rel="canonical" href="https://anujkhare.github.io/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://anujkhare.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://anujkhare.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://anujkhare.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://anujkhare.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://anujkhare.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://anujkhare.github.io/posts/001-toy-jax-framework/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<meta property="og:url" content="https://anujkhare.github.io/posts/001-toy-jax-framework/">
+  <meta property="og:site_name" content="Anuj&#39;s Blog">
+  <meta property="og:title" content="Toy Jax Framework">
+  <meta property="og:description" content="A simple NN framework in jax.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-06T17:42:57+01:00">
+    <meta property="article:modified_time" content="2025-04-06T17:42:57+01:00">
+    <meta property="article:tag" content="Jax">
+    <meta property="article:tag" content="From Scratch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Toy Jax Framework">
+<meta name="twitter:description" content="A simple NN framework in jax.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://anujkhare.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Toy Jax Framework",
+      "item": "https://anujkhare.github.io/posts/001-toy-jax-framework/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Toy Jax Framework",
+  "name": "Toy Jax Framework",
+  "description": "A simple NN framework in jax.",
+  "keywords": [
+    "jax", "from scratch"
+  ],
+  "articleBody": "Let’s build yet another jax neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.\nI have been greatly inspired by the design of equinox. Quoting from their Github page:\nneural networks (or more generally any model), with easy-to-use PyTorch-like syntax; filtered APIs for transformations; useful PyTree manipulation routines; advanced features like runtime errors; and best of all, equinox isn’t a framework: everything you write in equinox is compatible with anything else in JAX or the ecosystem. This is very close to my ideal library for sticking as close as possible to the core jax functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch. We aim for a much simpler version inspired by equinox with no bells and whistles.\nJax transforms work very well with Pytrees. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:\nparams = { 'layer1': { 'w': [0, 0, 1, 2], 'b': [1] }, 'layer2': { 'w': [-1, 2, 0, 3], 'b': [-1] }, } This is simple and works natively with jax transforms, but this will quickly get out of hand as we develop more nested components.\nSo, we try to come up with the Module abstraction. The Module is still a Pytree node, with:\ntrainable fields for parameters (weights, biases, etc.) static fields for metadata (like hidden sizes, name scopes, etc.) nested modules to enable composition compatibility with jax.jit, jax.grad, etc. import jax import jaxtyping import math import numpy as np import typing We set up a simple linear regression in N variables. Analytic solutions exist for this problem, but we use this as the first toy example as we build up toylib!\n# Problem setup n = 120 # examples d = 10 # dimensions # Generate some dummy data np.random.seed(31) xs = np.random.normal(size=(n, d)) weights_true = np.random.randint(0, 10, size=(d,)) ys = np.dot(xs, weights_true) + np.random.normal(size=(n,)) xs_train, xs_test = xs[:100], xs[100:] ys_train, ys_test = ys[:100], ys[100:] print(weights_true) [5 2 7 0 8 1 3 6 4 1] Let’s define a linear layer that does a single matrix multiplication and optionally adds a bias.\nclass Module: pass class Linear(Module): \"\"\"Defines a simple feedforward layer: which is a linear transformation. \"\"\" # Trainable parameters weights: jaxtyping.Array bias: typing.Optional[jaxtyping.Array] # Hyperparameters / metadata in_features: int out_features: int use_bias: bool def __init__(self, in_features: int, out_features: int, use_bias: bool = True, *, key: jaxtyping.PRNGKeyArray) -\u003e None: # Split the random key for weights and bias w_key, b_key = jax.random.split(key, 2) # We initialize the weights with a uniform distribution lim = 1 / math.sqrt(in_features) self.weights = jax.random.uniform(w_key, (in_features, out_features), minval=-lim, maxval=lim) if use_bias: self.bias = jax.random.uniform(b_key, (out_features,), minval=-lim, maxval=lim) self.in_features = in_features self.out_features = out_features self.use_bias = use_bias self.key = key def __call__(self, x: jaxtyping.Array) -\u003e jaxtyping.Array: x = jax.numpy.dot(x, self.weights) if self.use_bias: x = x + self.bias return x Let’s initialize a linear layer to match our data and do a simple forward pass.\nmodel = Linear(d, 1, use_bias=True, key=jax.random.PRNGKey(0)) y_pred = model(xs_train) print(y_pred.shape) (100, 1) Looks good so far, let’s define a loss function. We use the L2 loss (mean squared error) here. Further, let’s run this with jax’s value_and_grad function which we would utilize to compute the loss value and model gradients.\ndef loss_function(model, xs, ys): preds = jax.numpy.squeeze(model(xs)) return jax.numpy.mean((ys - preds) ** 2) # L2 Loss print(loss_function(model, xs_train, ys_train)) jax.value_and_grad(loss_function)(model, xs_train, ys_train) 176.39902 .../lib/python3.9/site-packages/jax/_src/dispatch.py:282, in check_arg(arg) 280 def check_arg(arg: Any): 281 if not (isinstance(arg, core.Tracer) or core.valid_jaxtype(arg)): --\u003e 282 raise TypeError(f\"Argument '{arg}' of type {type(arg)} is not a valid \" 283 \"JAX type.\") TypeError: Argument '\u003c__main__.Linear object at 0x120f651c0\u003e' of type ",
+  "wordCount" : "1224",
+  "inLanguage": "en",
+  "datePublished": "2025-04-06T17:42:57+01:00",
+  "dateModified": "2025-04-06T17:42:57+01:00",
+  "author":{
+    "@type": "Person",
+    "name": "Anuj Khare"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://anujkhare.github.io/posts/001-toy-jax-framework/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Anuj's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://anujkhare.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://anujkhare.github.io/" accesskey="h" title="Anuj&#39;s Blog (Alt + H)">Anuj&#39;s Blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://anujkhare.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://anujkhare.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Toy Jax Framework
+    </h1>
+    <div class="post-description">
+      A simple NN framework in jax.
+    </div>
+    <div class="post-meta"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1224 words&nbsp;·&nbsp;Anuj Khare
+
+</div>
+  </header> 
+
+  <div class="post-content"><p>Let&rsquo;s build yet another jax neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.</p>
+<p>I have been greatly inspired by the design of <a href="https://github.com/patrick-kidger/equinox">equinox</a>. Quoting from their Github page:</p>
+<ul>
+<li>neural networks (or more generally any model), with easy-to-use PyTorch-like syntax;</li>
+<li>filtered APIs for transformations;</li>
+<li>useful PyTree manipulation routines;</li>
+<li>advanced features like runtime errors;</li>
+<li>and best of all, equinox isn&rsquo;t a framework: everything you write in equinox is compatible with anything else in JAX or the ecosystem.</li>
+</ul>
+<p>This is very close to my ideal library for sticking as close as possible to the core jax functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch.  We aim for a much simpler version inspired by equinox with no bells and whistles.</p>
+<p>Jax transforms work very well with <a href="https://docs.jax.dev/en/latest/pytrees.html">Pytrees</a>. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>params <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;layer1&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;w&#39;</span>: [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>],
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;b&#39;</span>: [<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;layer2&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;w&#39;</span>: [<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">3</span>],
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;b&#39;</span>: [<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This is simple and works natively with jax transforms, but this will quickly get out of hand as we develop more nested components.</p>
+<p>So, we try to come up with the <code>Module</code> abstraction. The Module is still a Pytree node, with:</p>
+<ul>
+<li>trainable fields for parameters (weights, biases, etc.)</li>
+<li>static fields for metadata (like hidden sizes, name scopes, etc.)</li>
+<li>nested modules to enable composition</li>
+<li>compatibility with jax.jit, jax.grad, etc.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> jax
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> jaxtyping
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> math
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> typing
+</span></span></code></pre></div><p>We set up a simple linear regression in N variables. Analytic solutions exist for this problem, but we use this as the first toy example as we build up toylib!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Problem setup</span>
+</span></span><span style="display:flex;"><span>n <span style="color:#f92672">=</span> <span style="color:#ae81ff">120</span>  <span style="color:#75715e"># examples</span>
+</span></span><span style="display:flex;"><span>d <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>  <span style="color:#75715e"># dimensions</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate some dummy data</span>
+</span></span><span style="display:flex;"><span>np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>seed(<span style="color:#ae81ff">31</span>)
+</span></span><span style="display:flex;"><span>xs <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>normal(size<span style="color:#f92672">=</span>(n, d))
+</span></span><span style="display:flex;"><span>weights_true <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">10</span>, size<span style="color:#f92672">=</span>(d,))
+</span></span><span style="display:flex;"><span>ys <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>dot(xs, weights_true) <span style="color:#f92672">+</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>normal(size<span style="color:#f92672">=</span>(n,))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>xs_train, xs_test <span style="color:#f92672">=</span> xs[:<span style="color:#ae81ff">100</span>], xs[<span style="color:#ae81ff">100</span>:]
+</span></span><span style="display:flex;"><span>ys_train, ys_test <span style="color:#f92672">=</span> ys[:<span style="color:#ae81ff">100</span>], ys[<span style="color:#ae81ff">100</span>:]
+</span></span><span style="display:flex;"><span>print(weights_true)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">[5 2 7 0 8 1 3 6 4 1]
+</code></pre><p>Let&rsquo;s define a linear layer that does a single matrix multiplication and optionally adds a bias.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Module</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Linear</span>(Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Defines a simple feedforward layer: which is a linear transformation. &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Trainable parameters</span>
+</span></span><span style="display:flex;"><span>    weights: jaxtyping<span style="color:#f92672">.</span>Array
+</span></span><span style="display:flex;"><span>    bias: typing<span style="color:#f92672">.</span>Optional[jaxtyping<span style="color:#f92672">.</span>Array]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Hyperparameters / metadata</span>
+</span></span><span style="display:flex;"><span>    in_features: int
+</span></span><span style="display:flex;"><span>    out_features: int
+</span></span><span style="display:flex;"><span>    use_bias: bool
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, in_features: int, out_features: int, use_bias: bool <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, <span style="color:#f92672">*</span>, key: jaxtyping<span style="color:#f92672">.</span>PRNGKeyArray) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Split the random key for weights and bias</span>
+</span></span><span style="display:flex;"><span>        w_key, b_key <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>split(key, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># We initialize the weights with a uniform distribution</span>
+</span></span><span style="display:flex;"><span>        lim <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">/</span> math<span style="color:#f92672">.</span>sqrt(in_features)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(w_key, (in_features, out_features), minval<span style="color:#f92672">=-</span>lim, maxval<span style="color:#f92672">=</span>lim)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> use_bias:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>bias <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(b_key, (out_features,), minval<span style="color:#f92672">=-</span>lim, maxval<span style="color:#f92672">=</span>lim)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>in_features <span style="color:#f92672">=</span> in_features
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>out_features <span style="color:#f92672">=</span> out_features
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>use_bias <span style="color:#f92672">=</span> use_bias
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>key <span style="color:#f92672">=</span> key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __call__(self, x: jaxtyping<span style="color:#f92672">.</span>Array) <span style="color:#f92672">-&gt;</span> jaxtyping<span style="color:#f92672">.</span>Array:
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>dot(x, self<span style="color:#f92672">.</span>weights)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>use_bias:
+</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">=</span> x <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>bias
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x
+</span></span></code></pre></div><p>Let&rsquo;s initialize a linear layer to match our data and do a simple forward pass.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>model <span style="color:#f92672">=</span> Linear(d, <span style="color:#ae81ff">1</span>, use_bias<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, key<span style="color:#f92672">=</span>jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>PRNGKey(<span style="color:#ae81ff">0</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>y_pred <span style="color:#f92672">=</span> model(xs_train)
+</span></span><span style="display:flex;"><span>print(y_pred<span style="color:#f92672">.</span>shape)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">(100, 1)
+</code></pre><p>Looks good so far, let&rsquo;s define a loss function. We use the L2 loss (mean squared error) here. Further, let&rsquo;s run this with jax&rsquo;s <code>value_and_grad</code> function which we would utilize to compute the loss value and model gradients.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">loss_function</span>(model, xs, ys):
+</span></span><span style="display:flex;"><span>    preds <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>squeeze(model(xs))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>mean((ys <span style="color:#f92672">-</span> preds) <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>)  <span style="color:#75715e"># L2 Loss</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(loss_function(model, xs_train, ys_train))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>jax<span style="color:#f92672">.</span>value_and_grad(loss_function)(model, xs_train, ys_train)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">176.39902
+
+.../lib/python3.9/site-packages/jax/_src/dispatch.py:282, in check_arg(arg)
+    280 def check_arg(arg: Any):
+    281   if not (isinstance(arg, core.Tracer) or core.valid_jaxtype(arg)):
+--&gt; 282     raise TypeError(f&#34;Argument &#39;{arg}&#39; of type {type(arg)} is not a valid &#34;
+    283                     &#34;JAX type.&#34;)
+
+TypeError: Argument &#39;&lt;__main__.Linear object at 0x120f651c0&gt;&#39; of type &lt;class &#39;__main__.Linear&#39;&gt; is not a valid JAX type.
+</code></pre><p>We encounter a jax specific error here. Jax transformations like jax.grad, jax.value_and_grad, jax.jit, etc., operate on JAX-compatible types: mostly jax.Arrays, Python containers like tuples/lists/dicts of JAX arrays, and custom types that are registered with JAX&rsquo;s PyTree machinery.</p>
+<p>We need to fix this.</p>
+<p>We follow the strategy defined in <a href="https://jax.readthedocs.io/en/latest/faq.html#strategy-3-making-customclass-a-pytree">https://jax.readthedocs.io/en/latest/faq.html#strategy-3-making-customclass-a-pytree</a> to define a custom Pytree node.</p>
+<p>Our <code>Module</code> class needs to distinguish between the <code>dynamic</code> elements (which need to interact with jax via <code>jit</code> &amp; <code>grad</code>) vs the <code>static</code> elements:</p>
+<ul>
+<li>Hyperparameters (like layer sizes) will be static</li>
+<li>The actual weight arrays will be dynamic</li>
+</ul>
+<p>We make the following changes:</p>
+<ul>
+<li>Use the <code>@register_pytree_node_class</code> decorator to tell Jax that Linear is also a Pytree</li>
+<li>Add a <code>tree_flatten</code> method that separates the dynamic and static elements</li>
+<li>Add a <code>tree_unflatten</code> method that constructs the object back given the dynamic and static elements</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> jax.tree_util <span style="color:#f92672">import</span> register_pytree_node_class
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Linear</span>(Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Defines a simple feedforward layer: which is a linear transformation. &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Trainable parameters</span>
+</span></span><span style="display:flex;"><span>    weights: jaxtyping<span style="color:#f92672">.</span>Array
+</span></span><span style="display:flex;"><span>    bias: typing<span style="color:#f92672">.</span>Optional[jaxtyping<span style="color:#f92672">.</span>Array]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Hyperparameters / metadata</span>
+</span></span><span style="display:flex;"><span>    in_features: int
+</span></span><span style="display:flex;"><span>    out_features: int
+</span></span><span style="display:flex;"><span>    use_bias: bool
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, in_features: int, out_features: int, use_bias: bool <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, <span style="color:#f92672">*</span>, key: jaxtyping<span style="color:#f92672">.</span>PRNGKeyArray) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Split the random key for weights and bias</span>
+</span></span><span style="display:flex;"><span>        w_key, b_key <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>split(key, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># We initialize the weights with a uniform distribution</span>
+</span></span><span style="display:flex;"><span>        lim <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">/</span> math<span style="color:#f92672">.</span>sqrt(in_features)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(w_key, (in_features, out_features), minval<span style="color:#f92672">=-</span>lim, maxval<span style="color:#f92672">=</span>lim)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> use_bias:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>bias <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(b_key, (out_features,), minval<span style="color:#f92672">=-</span>lim, maxval<span style="color:#f92672">=</span>lim)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>in_features <span style="color:#f92672">=</span> in_features
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>out_features <span style="color:#f92672">=</span> out_features
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>use_bias <span style="color:#f92672">=</span> use_bias
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>key <span style="color:#f92672">=</span> key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __call__(self, x: jaxtyping<span style="color:#f92672">.</span>Array) <span style="color:#f92672">-&gt;</span> jaxtyping<span style="color:#f92672">.</span>Array:
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>dot(x, self<span style="color:#f92672">.</span>weights)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>use_bias:
+</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">=</span> x <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>bias
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_flatten</span>(self) <span style="color:#f92672">-&gt;</span> tuple:
+</span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> [self<span style="color:#f92672">.</span>weights, self<span style="color:#f92672">.</span>bias]
+</span></span><span style="display:flex;"><span>        static <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;in_features&#39;</span>: self<span style="color:#f92672">.</span>in_features,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;out_features&#39;</span>: self<span style="color:#f92672">.</span>out_features,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;use_bias&#39;</span>: self<span style="color:#f92672">.</span>use_bias,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;key&#39;</span>: self<span style="color:#f92672">.</span>key,
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> params, static
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@classmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_unflatten</span>(self, static, dynamic) <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#39;Linear&#39;</span>:
+</span></span><span style="display:flex;"><span>        weights, bias <span style="color:#f92672">=</span> dynamic
+</span></span><span style="display:flex;"><span>        in_features <span style="color:#f92672">=</span> static[<span style="color:#e6db74">&#39;in_features&#39;</span>]
+</span></span><span style="display:flex;"><span>        out_features <span style="color:#f92672">=</span> static[<span style="color:#e6db74">&#39;out_features&#39;</span>]
+</span></span><span style="display:flex;"><span>        use_bias <span style="color:#f92672">=</span> static[<span style="color:#e6db74">&#39;use_bias&#39;</span>]
+</span></span><span style="display:flex;"><span>        obj <span style="color:#f92672">=</span> Linear(in_features, out_features, use_bias, key<span style="color:#f92672">=</span>static[<span style="color:#e6db74">&#39;key&#39;</span>])
+</span></span><span style="display:flex;"><span>        obj<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> weights
+</span></span><span style="display:flex;"><span>        obj<span style="color:#f92672">.</span>bias <span style="color:#f92672">=</span> bias
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Initialize the model again and run value_and_grad</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> Linear(d, <span style="color:#ae81ff">1</span>, use_bias<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, key<span style="color:#f92672">=</span>jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>PRNGKey(<span style="color:#ae81ff">0</span>))
+</span></span><span style="display:flex;"><span>value, grad <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>value_and_grad(loss_function)(model, xs_train, ys_train)
+</span></span><span style="display:flex;"><span>print(value, grad)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">176.39902 &lt;__main__.Linear object at 0x126ecb130&gt;
+</code></pre><p>Great! We are able to get past the error and do a full forward and backward pass on the model.</p>
+<p>The <code>grads</code> is now also an object of the same type <code>Linear</code>. This is because jax now treats <code>Linear</code> objects as pytree nodes. For each applicable child in the node, it will produce a grad.</p>
+<p>How do we apply this gradient to get an update? Since <code>Linear</code> is now a PyTree, both model and grads share the same structure. We can use <a href="https://docs.jax.dev/en/latest/_autosummary/jax.tree_util.tree_map.html">jax.tree_utils.tree_map</a> to walk both trees and apply the update element-wise.</p>
+<p>Here, we simply use <code>theta_new</code> = <code>theta</code> - <code>learning_rate * grads</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">update</span>(model, grad, learning_rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.01</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Update the model parameters using gradient descent.&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> jax<span style="color:#f92672">.</span>tree_util<span style="color:#f92672">.</span>tree_map(<span style="color:#66d9ef">lambda</span> p, g: p <span style="color:#f92672">-</span> learning_rate <span style="color:#f92672">*</span> g, model, grad)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>updated <span style="color:#f92672">=</span> update(model, grad, learning_rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.01</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#39;model&#39;</span>)
+</span></span><span style="display:flex;"><span>jax<span style="color:#f92672">.</span>tree_util<span style="color:#f92672">.</span>tree_map(<span style="color:#66d9ef">lambda</span> x: print(x<span style="color:#f92672">.</span>shape), model)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#39;updated&#39;</span>)
+</span></span><span style="display:flex;"><span>jax<span style="color:#f92672">.</span>tree_util<span style="color:#f92672">.</span>tree_map(<span style="color:#66d9ef">lambda</span> x: print(x<span style="color:#f92672">.</span>shape), updated)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">model
+(10, 1)
+(1,)
+updated
+(10, 1)
+(1,)
+</code></pre><p>This was relatively straightforward for the <code>Linear</code> class. However, it is not scalable to define these serialize/deserialize methods for every module we define.</p>
+<p>To make this more generally useful, we move these methods to the base <code>Module</code> class. This will be covered in a follow up update to this post!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://anujkhare.github.io/tags/jax/">Jax</a></li>
+      <li><a href="https://anujkhare.github.io/tags/from-scratch/">From Scratch</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://anujkhare.github.io/posts/000-from-scratch-series/">
+    <span class="title">Next »</span>
+    <br>
+    <span>NN from scratch series</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://anujkhare.github.io/">Anuj&#39;s Blog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
