@@ -5,9 +5,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Toy Jax Framework | Anuj&#39;s Blog</title>
-<meta name="keywords" content="jax, from scratch">
-<meta name="description" content="A simple NN framework in jax.">
+<title>Toylib Jax Framework | Anuj&#39;s Blog</title>
+<meta name="keywords" content="JAX, from scratch">
+<meta name="description" content="A simple NN framework in JAX.">
 <meta name="author" content="Anuj Khare">
 <link rel="canonical" href="https://anujkhare.github.io/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
@@ -62,18 +62,18 @@
     onload="renderMathInElement(document.body);"></script>
 <meta property="og:url" content="https://anujkhare.github.io/posts/001-toy-jax-framework/">
   <meta property="og:site_name" content="Anuj&#39;s Blog">
-  <meta property="og:title" content="Toy Jax Framework">
-  <meta property="og:description" content="A simple NN framework in jax.">
+  <meta property="og:title" content="Toylib Jax Framework">
+  <meta property="og:description" content="A simple NN framework in JAX.">
   <meta property="og:locale" content="en-us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
     <meta property="article:published_time" content="2025-04-06T17:42:57+01:00">
     <meta property="article:modified_time" content="2025-04-06T17:42:57+01:00">
-    <meta property="article:tag" content="Jax">
+    <meta property="article:tag" content="JAX">
     <meta property="article:tag" content="From Scratch">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Toy Jax Framework">
-<meta name="twitter:description" content="A simple NN framework in jax.">
+<meta name="twitter:title" content="Toylib Jax Framework">
+<meta name="twitter:description" content="A simple NN framework in JAX.">
 
 
 <script type="application/ld+json">
@@ -90,7 +90,7 @@
     {
       "@type": "ListItem",
       "position":  2 ,
-      "name": "Toy Jax Framework",
+      "name": "Toylib Jax Framework",
       "item": "https://anujkhare.github.io/posts/001-toy-jax-framework/"
     }
   ]
@@ -100,14 +100,14 @@
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "Toy Jax Framework",
-  "name": "Toy Jax Framework",
-  "description": "A simple NN framework in jax.",
+  "headline": "Toylib Jax Framework",
+  "name": "Toylib Jax Framework",
+  "description": "A simple NN framework in JAX.",
   "keywords": [
-    "jax", "from scratch"
+    "JAX", "from scratch"
   ],
-  "articleBody": "Let’s build yet another jax neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.\nI have been greatly inspired by the design of equinox. Quoting from their Github page:\nneural networks (or more generally any model), with easy-to-use PyTorch-like syntax; filtered APIs for transformations; useful PyTree manipulation routines; advanced features like runtime errors; and best of all, equinox isn’t a framework: everything you write in equinox is compatible with anything else in JAX or the ecosystem. This is very close to my ideal library for sticking as close as possible to the core jax functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch. We aim for a much simpler version inspired by equinox with no bells and whistles.\nJax transforms work very well with Pytrees. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:\nparams = { 'layer1': { 'w': [0, 0, 1, 2], 'b': [1] }, 'layer2': { 'w': [-1, 2, 0, 3], 'b': [-1] }, } This is simple and works natively with jax transforms, but this will quickly get out of hand as we develop more nested components.\nSo, we try to come up with the Module abstraction. The Module is still a Pytree node, with:\ntrainable fields for parameters (weights, biases, etc.) static fields for metadata (like hidden sizes, name scopes, etc.) nested modules to enable composition compatibility with jax.jit, jax.grad, etc. import jax import jaxtyping import math import numpy as np import typing We set up a simple linear regression in N variables. Analytic solutions exist for this problem, but we use this as the first toy example as we build up toylib!\n# Problem setup n = 120 # examples d = 10 # dimensions # Generate some dummy data np.random.seed(31) xs = np.random.normal(size=(n, d)) weights_true = np.random.randint(0, 10, size=(d,)) ys = np.dot(xs, weights_true) + np.random.normal(size=(n,)) xs_train, xs_test = xs[:100], xs[100:] ys_train, ys_test = ys[:100], ys[100:] print(weights_true) [5 2 7 0 8 1 3 6 4 1] Let’s define a linear layer that does a single matrix multiplication and optionally adds a bias.\nclass Module: pass class Linear(Module): \"\"\"Defines a simple feedforward layer: which is a linear transformation. \"\"\" # Trainable parameters weights: jaxtyping.Array bias: typing.Optional[jaxtyping.Array] # Hyperparameters / metadata in_features: int out_features: int use_bias: bool def __init__(self, in_features: int, out_features: int, use_bias: bool = True, *, key: jaxtyping.PRNGKeyArray) -\u003e None: # Split the random key for weights and bias w_key, b_key = jax.random.split(key, 2) # We initialize the weights with a uniform distribution lim = 1 / math.sqrt(in_features) self.weights = jax.random.uniform(w_key, (in_features, out_features), minval=-lim, maxval=lim) if use_bias: self.bias = jax.random.uniform(b_key, (out_features,), minval=-lim, maxval=lim) self.in_features = in_features self.out_features = out_features self.use_bias = use_bias self.key = key def __call__(self, x: jaxtyping.Array) -\u003e jaxtyping.Array: x = jax.numpy.dot(x, self.weights) if self.use_bias: x = x + self.bias return x Let’s initialize a linear layer to match our data and do a simple forward pass.\nmodel = Linear(d, 1, use_bias=True, key=jax.random.PRNGKey(0)) y_pred = model(xs_train) print(y_pred.shape) (100, 1) Looks good so far, let’s define a loss function. We use the L2 loss (mean squared error) here. Further, let’s run this with jax’s value_and_grad function which we would utilize to compute the loss value and model gradients.\ndef loss_function(model, xs, ys): preds = jax.numpy.squeeze(model(xs)) return jax.numpy.mean((ys - preds) ** 2) # L2 Loss print(loss_function(model, xs_train, ys_train)) jax.value_and_grad(loss_function)(model, xs_train, ys_train) 176.39902 .../lib/python3.9/site-packages/jax/_src/dispatch.py:282, in check_arg(arg) 280 def check_arg(arg: Any): 281 if not (isinstance(arg, core.Tracer) or core.valid_jaxtype(arg)): --\u003e 282 raise TypeError(f\"Argument '{arg}' of type {type(arg)} is not a valid \" 283 \"JAX type.\") TypeError: Argument '\u003c__main__.Linear object at 0x120f651c0\u003e' of type ",
-  "wordCount" : "1224",
+  "articleBody": "Let’s build yet another JAX neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.\nI have been greatly inspired by the design of equinox. Quoting from their Github page:\nneural networks (or more generally any model), with easy-to-use PyTorch-like syntax; filtered APIs for transformations; useful PyTree manipulation routines; advanced features like runtime errors; and best of all, equinox isn’t a framework: everything you write in equinox is compatible with anything else in JAX or the ecosystem. This is very close to my ideal library for sticking as close as possible to the core JAX functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch. We aim for a much simpler version inspired by equinox with no bells and whistles.\nJAX transforms work very well with Pytrees. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:\nparams = { 'layer1': { 'w': [0, 0, 1, 2], 'b': [1] }, 'layer2': { 'w': [-1, 2, 0, 3], 'b': [-1] }, } This is simple and works natively with JAX transforms, but this will quickly get out of hand as we develop more nested components.\nSo, we try to come up with the Module abstraction. The Module is still a Pytree node, with:\ntrainable fields for parameters (weights, biases, etc.) static fields for metadata (like hidden sizes, name scopes, etc.) nested modules to enable composition compatibility with jax.jit, jax.grad, etc. import jax import jaxtyping import math import numpy as np import typing We set up a simple linear regression in N variables. Analytic solutions exist for this problem, but we use this as the first toy example as we build up toylib!\n# Problem setup n = 120 # examples d = 10 # dimensions # Generate some dummy data np.random.seed(31) xs = np.random.normal(size=(n, d)) weights_true = np.random.randint(0, 10, size=(d,)) ys = np.dot(xs, weights_true) + np.random.normal(size=(n,)) xs_train, xs_test = xs[:100], xs[100:] ys_train, ys_test = ys[:100], ys[100:] print(weights_true) [5 2 7 0 8 1 3 6 4 1] Let’s define a linear layer that does a single matrix multiplication and optionally adds a bias.\nclass Module: pass class Linear(Module): \"\"\"Defines a simple feedforward layer: which is a linear transformation. \"\"\" # Trainable parameters weights: jaxtyping.Array bias: typing.Optional[jaxtyping.Array] # Hyperparameters / metadata in_features: int out_features: int use_bias: bool def __init__(self, in_features: int, out_features: int, use_bias: bool = True, *, key: jaxtyping.PRNGKeyArray) -\u003e None: # Split the random key for weights and bias w_key, b_key = jax.random.split(key, 2) # We initialize the weights with a uniform distribution lim = 1 / math.sqrt(in_features) self.weights = jax.random.uniform(w_key, (in_features, out_features), minval=-lim, maxval=lim) if use_bias: self.bias = jax.random.uniform(b_key, (out_features,), minval=-lim, maxval=lim) self.in_features = in_features self.out_features = out_features self.use_bias = use_bias self.key = key def __call__(self, x: jaxtyping.Array) -\u003e jaxtyping.Array: x = jax.numpy.dot(x, self.weights) if self.use_bias: x = x + self.bias return x Let’s initialize a linear layer to match our data and do a simple forward pass.\nmodel = Linear(d, 1, use_bias=True, key=jax.random.PRNGKey(0)) y_pred = model(xs_train) print(y_pred.shape) (100, 1) Looks good so far, let’s define a loss function. We use the L2 loss (mean squared error) here. Further, let’s run this with JAX’s value_and_grad function which we would utilize to compute the loss value and model gradients.\ndef loss_function(model, xs, ys): preds = jax.numpy.squeeze(model(xs)) return jax.numpy.mean((ys - preds) ** 2) # L2 Loss print(loss_function(model, xs_train, ys_train)) jax.value_and_grad(loss_function)(model, xs_train, ys_train) 176.39902 .../lib/python3.9/site-packages/jax/_src/dispatch.py:282, in check_arg(arg) 280 def check_arg(arg: Any): 281 if not (isinstance(arg, core.Tracer) or core.valid_jaxtype(arg)): --\u003e 282 raise TypeError(f\"Argument '{arg}' of type {type(arg)} is not a valid \" 283 \"JAX type.\") TypeError: Argument '\u003c__main__.Linear object at 0x120f651c0\u003e' of type ",
+  "wordCount" : "1910",
   "inLanguage": "en",
   "datePublished": "2025-04-06T17:42:57+01:00",
   "dateModified": "2025-04-06T17:42:57+01:00",
@@ -180,17 +180,17 @@
   <header class="post-header">
     <div class="breadcrumbs"><a href="https://anujkhare.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://anujkhare.github.io/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
-      Toy Jax Framework
+      Toylib Jax Framework
     </h1>
     <div class="post-description">
-      A simple NN framework in jax.
+      A simple NN framework in JAX.
     </div>
-    <div class="post-meta"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1224 words&nbsp;·&nbsp;Anuj Khare
+    <div class="post-meta"><span title='2025-04-06 17:42:57 +0100 +0100'>April 6, 2025</span>&nbsp;·&nbsp;9 min&nbsp;·&nbsp;1910 words&nbsp;·&nbsp;Anuj Khare
 
 </div>
   </header> 
 
-  <div class="post-content"><p>Let&rsquo;s build yet another jax neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.</p>
+  <div class="post-content"><p>Let&rsquo;s build yet another JAX neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.</p>
 <p>I have been greatly inspired by the design of <a href="https://github.com/patrick-kidger/equinox">equinox</a>. Quoting from their Github page:</p>
 <ul>
 <li>neural networks (or more generally any model), with easy-to-use PyTorch-like syntax;</li>
@@ -199,8 +199,8 @@
 <li>advanced features like runtime errors;</li>
 <li>and best of all, equinox isn&rsquo;t a framework: everything you write in equinox is compatible with anything else in JAX or the ecosystem.</li>
 </ul>
-<p>This is very close to my ideal library for sticking as close as possible to the core jax functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch.  We aim for a much simpler version inspired by equinox with no bells and whistles.</p>
-<p>Jax transforms work very well with <a href="https://docs.jax.dev/en/latest/pytrees.html">Pytrees</a>. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:</p>
+<p>This is very close to my ideal library for sticking as close as possible to the core JAX functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch.  We aim for a much simpler version inspired by equinox with no bells and whistles.</p>
+<p>JAX transforms work very well with <a href="https://docs.jax.dev/en/latest/pytrees.html">Pytrees</a>. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>params <span style="color:#f92672">=</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;layer1&#39;</span>: {
 </span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;w&#39;</span>: [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>],
@@ -211,13 +211,13 @@
 </span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;b&#39;</span>: [<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
 </span></span><span style="display:flex;"><span>    },
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>This is simple and works natively with jax transforms, but this will quickly get out of hand as we develop more nested components.</p>
+</span></span></code></pre></div><p>This is simple and works natively with JAX transforms, but this will quickly get out of hand as we develop more nested components.</p>
 <p>So, we try to come up with the <code>Module</code> abstraction. The Module is still a Pytree node, with:</p>
 <ul>
 <li>trainable fields for parameters (weights, biases, etc.)</li>
 <li>static fields for metadata (like hidden sizes, name scopes, etc.)</li>
 <li>nested modules to enable composition</li>
-<li>compatibility with jax.jit, jax.grad, etc.</li>
+<li>compatibility with <code>jax.jit</code>, <code>jax.grad</code>, etc.</li>
 </ul>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> jax
 </span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> jaxtyping
@@ -281,7 +281,7 @@
 </span></span><span style="display:flex;"><span>y_pred <span style="color:#f92672">=</span> model(xs_train)
 </span></span><span style="display:flex;"><span>print(y_pred<span style="color:#f92672">.</span>shape)
 </span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">(100, 1)
-</code></pre><p>Looks good so far, let&rsquo;s define a loss function. We use the L2 loss (mean squared error) here. Further, let&rsquo;s run this with jax&rsquo;s <code>value_and_grad</code> function which we would utilize to compute the loss value and model gradients.</p>
+</code></pre><p>Looks good so far, let&rsquo;s define a loss function. We use the L2 loss (mean squared error) here. Further, let&rsquo;s run this with JAX&rsquo;s <code>value_and_grad</code> function which we would utilize to compute the loss value and model gradients.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">loss_function</span>(model, xs, ys):
 </span></span><span style="display:flex;"><span>    preds <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>squeeze(model(xs))
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>mean((ys <span style="color:#f92672">-</span> preds) <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>)  <span style="color:#75715e"># L2 Loss</span>
@@ -298,7 +298,7 @@
     283                     &#34;JAX type.&#34;)
 
 TypeError: Argument &#39;&lt;__main__.Linear object at 0x120f651c0&gt;&#39; of type &lt;class &#39;__main__.Linear&#39;&gt; is not a valid JAX type.
-</code></pre><p>We encounter a jax specific error here. Jax transformations like jax.grad, jax.value_and_grad, jax.jit, etc., operate on JAX-compatible types: mostly jax.Arrays, Python containers like tuples/lists/dicts of JAX arrays, and custom types that are registered with JAX&rsquo;s PyTree machinery.</p>
+</code></pre><p>We encounter a JAX specific error here. JAX transformations like <code>jax.grad</code>, <code>jax.value_and_grad</code>, <code>jax.jit</code>, etc., operate on JAX-compatible types: mostly jax.Arrays, Python containers like tuples/lists/dicts of JAX arrays, and custom types that are registered with JAX&rsquo;s PyTree machinery.</p>
 <p>We need to fix this.</p>
 <p>We follow the strategy defined in <a href="https://jax.readthedocs.io/en/latest/faq.html#strategy-3-making-customclass-a-pytree">https://jax.readthedocs.io/en/latest/faq.html#strategy-3-making-customclass-a-pytree</a> to define a custom Pytree node.</p>
 <p>Our <code>Module</code> class needs to distinguish between the <code>dynamic</code> elements (which need to interact with jax via <code>jit</code> &amp; <code>grad</code>) vs the <code>static</code> elements:</p>
@@ -316,37 +316,8 @@ TypeError: Argument &#39;&lt;__main__.Linear object at 0x120f651c0&gt;&#39; of t
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Linear</span>(Module):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Defines a simple feedforward layer: which is a linear transformation. &#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Trainable parameters</span>
-</span></span><span style="display:flex;"><span>    weights: jaxtyping<span style="color:#f92672">.</span>Array
-</span></span><span style="display:flex;"><span>    bias: typing<span style="color:#f92672">.</span>Optional[jaxtyping<span style="color:#f92672">.</span>Array]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Hyperparameters / metadata</span>
-</span></span><span style="display:flex;"><span>    in_features: int
-</span></span><span style="display:flex;"><span>    out_features: int
-</span></span><span style="display:flex;"><span>    use_bias: bool
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, in_features: int, out_features: int, use_bias: bool <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, <span style="color:#f92672">*</span>, key: jaxtyping<span style="color:#f92672">.</span>PRNGKeyArray) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Split the random key for weights and bias</span>
-</span></span><span style="display:flex;"><span>        w_key, b_key <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>split(key, <span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>        
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># We initialize the weights with a uniform distribution</span>
-</span></span><span style="display:flex;"><span>        lim <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">/</span> math<span style="color:#f92672">.</span>sqrt(in_features)
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(w_key, (in_features, out_features), minval<span style="color:#f92672">=-</span>lim, maxval<span style="color:#f92672">=</span>lim)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> use_bias:
-</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>bias <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>uniform(b_key, (out_features,), minval<span style="color:#f92672">=-</span>lim, maxval<span style="color:#f92672">=</span>lim)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>in_features <span style="color:#f92672">=</span> in_features
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>out_features <span style="color:#f92672">=</span> out_features
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>use_bias <span style="color:#f92672">=</span> use_bias
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>key <span style="color:#f92672">=</span> key
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __call__(self, x: jaxtyping<span style="color:#f92672">.</span>Array) <span style="color:#f92672">-&gt;</span> jaxtyping<span style="color:#f92672">.</span>Array:
-</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>numpy<span style="color:#f92672">.</span>dot(x, self<span style="color:#f92672">.</span>weights)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>use_bias:
-</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">=</span> x <span style="color:#f92672">+</span> self<span style="color:#f92672">.</span>bias
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Unchanged</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_flatten</span>(self) <span style="color:#f92672">-&gt;</span> tuple:
 </span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> [self<span style="color:#f92672">.</span>weights, self<span style="color:#f92672">.</span>bias]
@@ -359,12 +330,12 @@ TypeError: Argument &#39;&lt;__main__.Linear object at 0x120f651c0&gt;&#39; of t
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> params, static
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@classmethod</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_unflatten</span>(self, static, dynamic) <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#39;Linear&#39;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_unflatten</span>(cls, static, dynamic) <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#39;Linear&#39;</span>:
 </span></span><span style="display:flex;"><span>        weights, bias <span style="color:#f92672">=</span> dynamic
 </span></span><span style="display:flex;"><span>        in_features <span style="color:#f92672">=</span> static[<span style="color:#e6db74">&#39;in_features&#39;</span>]
 </span></span><span style="display:flex;"><span>        out_features <span style="color:#f92672">=</span> static[<span style="color:#e6db74">&#39;out_features&#39;</span>]
 </span></span><span style="display:flex;"><span>        use_bias <span style="color:#f92672">=</span> static[<span style="color:#e6db74">&#39;use_bias&#39;</span>]
-</span></span><span style="display:flex;"><span>        obj <span style="color:#f92672">=</span> Linear(in_features, out_features, use_bias, key<span style="color:#f92672">=</span>static[<span style="color:#e6db74">&#39;key&#39;</span>])
+</span></span><span style="display:flex;"><span>        obj <span style="color:#f92672">=</span> cls(in_features, out_features, use_bias, key<span style="color:#f92672">=</span>static[<span style="color:#e6db74">&#39;key&#39;</span>])
 </span></span><span style="display:flex;"><span>        obj<span style="color:#f92672">.</span>weights <span style="color:#f92672">=</span> weights
 </span></span><span style="display:flex;"><span>        obj<span style="color:#f92672">.</span>bias <span style="color:#f92672">=</span> bias
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj
@@ -394,14 +365,192 @@ updated
 (10, 1)
 (1,)
 </code></pre><p>This was relatively straightforward for the <code>Linear</code> class. However, it is not scalable to define these serialize/deserialize methods for every module we define.</p>
-<p>To make this more generally useful, we move these methods to the base <code>Module</code> class. This will be covered in a follow up update to this post!</p>
+<p>To make this more generally useful, we move these methods to the base <code>Module</code> class.</p>
+<p>We make some simplifying assumptions here:</p>
+<ul>
+<li>All jax or numpy arrays in the modules will be parameters</li>
+<li>Everything else is a hyperparameter to be treated as aux data</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_is_array</span>(x: typing<span style="color:#f92672">.</span>Any) <span style="color:#f92672">-&gt;</span> bool:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> isinstance(
+</span></span><span style="display:flex;"><span>        x, (jax<span style="color:#f92672">.</span>Array, np<span style="color:#f92672">.</span>ndarray, np<span style="color:#f92672">.</span>generic)
+</span></span><span style="display:flex;"><span>    ) <span style="color:#f92672">or</span> hasattr(x, <span style="color:#e6db74">&#34;__jax_array__&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_is_random_key</span>(x: str) <span style="color:#f92672">-&gt;</span> bool:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> x <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;key&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Module</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_flatten</span>(self) <span style="color:#f92672">-&gt;</span> tuple:
+</span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        param_keys <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        aux_data <span style="color:#f92672">=</span> dict()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Look through each attribute in the object</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> k, v <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>__dict__<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> _is_array(v) <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> _is_random_key(k):
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># trainable leaf param!</span>
+</span></span><span style="display:flex;"><span>                params<span style="color:#f92672">.</span>append(v)
+</span></span><span style="display:flex;"><span>                param_keys<span style="color:#f92672">.</span>append(k)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                aux_data[k] <span style="color:#f92672">=</span> v
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        aux_data[<span style="color:#e6db74">&#39;param_keys&#39;</span>] <span style="color:#f92672">=</span> param_keys
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> params, aux_data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@classmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_unflatten</span>(cls, static, dynamic) <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#39;Linear&#39;</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create a new empty object</span>
+</span></span><span style="display:flex;"><span>        obj <span style="color:#f92672">=</span> object<span style="color:#f92672">.</span>__new__(cls)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># overwrite all of the children using the values in the given pytree</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> k, v <span style="color:#f92672">in</span> zip(static[<span style="color:#e6db74">&#39;param_keys&#39;</span>], dynamic):
+</span></span><span style="display:flex;"><span>            obj<span style="color:#f92672">.</span>__setattr__(k, v)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> k, v <span style="color:#f92672">in</span> static<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>            obj<span style="color:#f92672">.</span>__setattr__(k, v)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Linear</span>(Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, in_features: int, out_features: int, use_bias: bool <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>, <span style="color:#f92672">*</span>, key: jaxtyping<span style="color:#f92672">.</span>PRNGKeyArray) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __call__(self, x: jaxtyping<span style="color:#f92672">.</span>Array) <span style="color:#f92672">-&gt;</span> jaxtyping<span style="color:#f92672">.</span>Array:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> Linear(d, <span style="color:#ae81ff">1</span>, use_bias<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, key<span style="color:#f92672">=</span>jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>PRNGKey(<span style="color:#ae81ff">0</span>))
+</span></span><span style="display:flex;"><span>value, grad <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>value_and_grad(loss_function)(model, xs_train, ys_train)
+</span></span><span style="display:flex;"><span>print(value, grad)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">176.39902 &lt;__main__.Linear object at 0x12780ff40&gt;
+</code></pre><p>That works!</p>
+<p>The serializing function <code>tree_flatten</code> identifies all trainable parameters - which are assumed to be jax arrays, except for the random keys - and sets them as the &ldquo;dynamic&rdquo; elements in the pytree. Everything else, including the names of these parameters are added to the <code>aux_data</code> dict.
+All jax transforms will serialize our class using this function, operate on the dynamic elements, and then reconstruct the class using the <code>tree_unflatten</code> method.</p>
+<p>There is still one major feature that we haven&rsquo;t addressed yet: nested modules.</p>
+<p>Let&rsquo;s look at a simple MLP that uses two linear layers.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MLP</span>(Module):
+</span></span><span style="display:flex;"><span>    output_layer: Linear
+</span></span><span style="display:flex;"><span>    layers: typing<span style="color:#f92672">.</span>List[Module]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    in_features: int
+</span></span><span style="display:flex;"><span>    hidden_dims: list[int]
+</span></span><span style="display:flex;"><span>    out_features: int
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, in_features: int, hidden_dims: list[int], out_features: int, <span style="color:#f92672">*</span>, key: jaxtyping<span style="color:#f92672">.</span>PRNGKeyArray) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Split the random key for weights and bias</span>
+</span></span><span style="display:flex;"><span>        keys <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>split(key, len(hidden_dims) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create the layers</span>
+</span></span><span style="display:flex;"><span>        layers <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        input_dim <span style="color:#f92672">=</span> in_features
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i, hidden_dim <span style="color:#f92672">in</span> enumerate(hidden_dims):
+</span></span><span style="display:flex;"><span>            layer <span style="color:#f92672">=</span> Linear(input_dim, hidden_dim, key<span style="color:#f92672">=</span>keys[i])
+</span></span><span style="display:flex;"><span>            layers<span style="color:#f92672">.</span>append(layer)
+</span></span><span style="display:flex;"><span>            input_dim <span style="color:#f92672">=</span> hidden_dim
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Create the output layer</span>
+</span></span><span style="display:flex;"><span>        output_layer <span style="color:#f92672">=</span> Linear(input_dim, out_features, key<span style="color:#f92672">=</span>keys[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>layers <span style="color:#f92672">=</span> layers
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>output_layer <span style="color:#f92672">=</span> output_layer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __call__(self, x: jaxtyping<span style="color:#f92672">.</span>Array) <span style="color:#f92672">-&gt;</span> jaxtyping<span style="color:#f92672">.</span>Array:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> layer <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>layers:
+</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">=</span> layer(x)
+</span></span><span style="display:flex;"><span>            x <span style="color:#f92672">=</span> jax<span style="color:#f92672">.</span>nn<span style="color:#f92672">.</span>relu(x)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>output_layer(x)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> MLP(d, [<span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>], <span style="color:#ae81ff">1</span>, key<span style="color:#f92672">=</span>jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>PRNGKey(<span style="color:#ae81ff">0</span>))
+</span></span><span style="display:flex;"><span>print(jax<span style="color:#f92672">.</span>value_and_grad(loss_function)(model, xs_train, ys_train))
+</span></span><span style="display:flex;"><span>print(jax<span style="color:#f92672">.</span>tree_util<span style="color:#f92672">.</span>tree_flatten(model))
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">(Array(180.0803, dtype=float32), &lt;__main__.MLP at 0x127f0e160&gt;)
+
+([],
+ PyTreeDef(CustomNode(MLP[{&#39;layers&#39;: [&lt;__main__.Linear object at 0x12780ff40&gt;, &lt;__main__.Linear object at 0x127dff970&gt;], &#39;output_layer&#39;: &lt;__main__.Linear object at 0x1279f44f0&gt;, &#39;param_keys&#39;: []}], [])))
+</code></pre><p>At first glance, this looks okay since the forward pass works fine. However, a closer look at the output of <code>tree_flatten</code> reveals that the nested modules are not included in the dynamic elements at all and hence would be ignored by the JAX transforms. This is because we never serialize any nested modules.</p>
+<p>Let&rsquo;s address this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Module</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_flatten</span>(self) <span style="color:#f92672">-&gt;</span> tuple:
+</span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        param_keys <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        aux_data <span style="color:#f92672">=</span> dict()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Look through each attribute in the object</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> k, v <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>__dict__<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (_is_array(v) <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> _is_random_key(k)) <span style="color:#f92672">or</span> isinstance(v, Module):
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># trainable leaf param!</span>
+</span></span><span style="display:flex;"><span>                params<span style="color:#f92672">.</span>append(v)
+</span></span><span style="display:flex;"><span>                param_keys<span style="color:#f92672">.</span>append(k)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                aux_data[k] <span style="color:#f92672">=</span> v
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        aux_data[<span style="color:#e6db74">&#39;param_keys&#39;</span>] <span style="color:#f92672">=</span> param_keys
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> params, aux_data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> MLP(d, [<span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">64</span>], <span style="color:#ae81ff">1</span>, key<span style="color:#f92672">=</span>jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>PRNGKey(<span style="color:#ae81ff">0</span>))
+</span></span><span style="display:flex;"><span>print(jax<span style="color:#f92672">.</span>value_and_grad(loss_function)(model, xs_train, ys_train))
+</span></span><span style="display:flex;"><span>jax<span style="color:#f92672">.</span>tree_util<span style="color:#f92672">.</span>tree_map(<span style="color:#66d9ef">lambda</span> x: print(x<span style="color:#f92672">.</span>shape), model)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">(Array(180.0803, dtype=float32), &lt;__main__.MLP object at 0x134923160&gt;)
+(64, 1)
+(1,)
+</code></pre><p>The only change is checking if an attribute is of type <code>Module</code> - indicating it is a nested module. Recursion is handled implicitly by JAX. Something is still amiss - the shapes printed in the  <code>tree_map</code> correspond to the last layer <code>output_layer</code>, but the intermediate layers stored in <code>layers</code> are completely missing.</p>
+<p>This happens because <code>layers</code> is a <code>list</code> of <code>Module</code>s and presently gets assigned to the aux dict. Unfortunately, there is no easy generic way to handle such lists of nested modules. We make one simple change to specifically handle the case where we have a list of <code>Module</code>s:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_is_supported_container</span>(x: typing<span style="color:#f92672">.</span>Any) <span style="color:#f92672">-&gt;</span> bool:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> isinstance(x, (list, tuple))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@register_pytree_node_class</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Module</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">tree_flatten</span>(self) <span style="color:#f92672">-&gt;</span> tuple:
+</span></span><span style="display:flex;"><span>        params <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        param_keys <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        aux_data <span style="color:#f92672">=</span> dict()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Look through each attribute in the object</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> k, v <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>__dict__<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Leaf JAX array, but not a random key</span>
+</span></span><span style="display:flex;"><span>                (_is_array(v) <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> _is_random_key(k))
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># Nested Module</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">or</span> isinstance(v, Module)
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e"># list / tuple of nested Modules</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">or</span> (_is_supported_container(v) <span style="color:#f92672">and</span> all(isinstance(elem, Module) <span style="color:#66d9ef">for</span> elem <span style="color:#f92672">in</span> v))
+</span></span><span style="display:flex;"><span>            ):
+</span></span><span style="display:flex;"><span>                params<span style="color:#f92672">.</span>append(v)
+</span></span><span style="display:flex;"><span>                param_keys<span style="color:#f92672">.</span>append(k)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                aux_data[k] <span style="color:#f92672">=</span> v
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        aux_data[<span style="color:#e6db74">&#39;param_keys&#39;</span>] <span style="color:#f92672">=</span> param_keys
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> params, aux_data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model <span style="color:#f92672">=</span> MLP(d, [<span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">64</span>], <span style="color:#ae81ff">1</span>, key<span style="color:#f92672">=</span>jax<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>PRNGKey(<span style="color:#ae81ff">0</span>))
+</span></span><span style="display:flex;"><span>print(jax<span style="color:#f92672">.</span>value_and_grad(loss_function)(model, xs_train, ys_train))
+</span></span><span style="display:flex;"><span>jax<span style="color:#f92672">.</span>tree_util<span style="color:#f92672">.</span>tree_map(<span style="color:#66d9ef">lambda</span> x: print(x<span style="color:#f92672">.</span>shape), model)
+</span></span></code></pre></div><pre tabindex="0"><code class="language-output" data-lang="output">(Array(180.42581, dtype=float32), &lt;__main__.MLP object at 0x134c2f370&gt;)
+(10, 32)
+(32,)
+(32, 64)
+(64,)
+(64, 1)
+(1,)
+</code></pre><p>That&rsquo;s it! We end up with a lot of assumptions on the specific structure of the Modules, but it <em>seems</em> like a flexible enough representation for some more serious models. We shall see how well this holds up!</p>
 
 
   </div>
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://anujkhare.github.io/tags/jax/">Jax</a></li>
+      <li><a href="https://anujkhare.github.io/tags/jax/">JAX</a></li>
       <li><a href="https://anujkhare.github.io/tags/from-scratch/">From Scratch</a></li>
     </ul>
 <nav class="paginav">
