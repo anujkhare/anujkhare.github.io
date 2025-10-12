@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><meta charset="utf-8">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="noindex, nofollow">
 <title>Posts | Anuj&#39;s Blog</title>
 <meta name="keywords" content="">
 <meta name="description" content="Posts - Anuj&#39;s Blog">
 <meta name="author" content="">
-<link rel="canonical" href="https://anujkhare.github.io/posts/">
+<link rel="canonical" href="http://localhost:1313/posts/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://anujkhare.github.io/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://anujkhare.github.io/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://anujkhare.github.io/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://anujkhare.github.io/apple-touch-icon.png">
-<link rel="mask-icon" href="https://anujkhare.github.io/safari-pinned-tab.svg">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://anujkhare.github.io/posts/index.xml">
-<link rel="alternate" hreflang="en" href="https://anujkhare.github.io/posts/">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/posts/index.xml">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/">
 <noscript>
     <style>
         #theme-toggle,
@@ -56,30 +56,7 @@
         }
 
     </style>
-</noscript><meta property="og:url" content="https://anujkhare.github.io/posts/">
-  <meta property="og:site_name" content="Anuj&#39;s Blog">
-  <meta property="og:title" content="Posts">
-  <meta property="og:locale" content="en-us">
-  <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Posts">
-<meta name="twitter:description" content="">
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position":  1 ,
-      "name": "Posts",
-      "item": "https://anujkhare.github.io/posts/"
-    }
-  ]
-}
-</script>
+</noscript>
 </head>
 
 <body class="list" id="top">
@@ -97,7 +74,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://anujkhare.github.io/" accesskey="h" title="Anuj&#39;s Blog (Alt + H)">Anuj&#39;s Blog</a>
+            <a href="http://localhost:1313/" accesskey="h" title="Anuj&#39;s Blog (Alt + H)">Anuj&#39;s Blog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -134,6 +111,24 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Attention? Simple text classification with attention!
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Transformer Self-Attention Block A Transformer encoder block consists of:
+Multi-Head Self-Attention Add &amp; Layer Normalization Position-wise Feed-Forward Network (FFN) Add &amp; Layer Normalization 🔹 1. Scaled Dot-Product Attention Given input ( X \in \mathbb{R}^{\text{seq_len} \times d_{\text{model}}} ):
+[ Q = XW^Q, \quad K = XW^K, \quad V = XW^V ]
+[ \text{Attention}(Q, K, V) = \text{softmax}\left( \frac{QK^\top}{\sqrt{d_k}} \right)V ]
+🔹 2. Multi-Head Attention [ \text{head}_i = \text{Attention}(XW_i^Q, XW_i^K, XW_i^V) ]
+[ \text{MultiHead}(X) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O ]
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-04-27 17:42:57 +0100 BST'>April 27, 2025</span>&nbsp;·&nbsp;1 min&nbsp;·&nbsp;212 words&nbsp;·&nbsp;Anuj Khare</footer>
+  <a class="entry-link" aria-label="post link to Attention? Simple text classification with attention!" href="http://localhost:1313/posts/002-text-classification-attention/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Toylib Jax Framework
     </h2>
   </header>
@@ -142,8 +137,8 @@
 I have been greatly inspired by the design of equinox. Quoting from their Github page:
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2025-04-06 17:42:57 +0100 +0100'>April 6, 2025</span>&nbsp;·&nbsp;10 min&nbsp;·&nbsp;1922 words&nbsp;·&nbsp;Anuj Khare</footer>
-  <a class="entry-link" aria-label="post link to Toylib Jax Framework" href="https://anujkhare.github.io/posts/001-toy-jax-framework/"></a>
+  <footer class="entry-footer"><span title='2025-04-06 17:42:57 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;10 min&nbsp;·&nbsp;1922 words&nbsp;·&nbsp;Anuj Khare</footer>
+  <a class="entry-link" aria-label="post link to Toylib Jax Framework" href="http://localhost:1313/posts/001-toy-jax-framework/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -155,13 +150,13 @@ I have been greatly inspired by the design of equinox. Quoting from their Github
     <p>I have been meaning for a long time to implement (toy versions of) some of the state-of-the-art ML models from scratch. The motivation is to increase my depth of understanding of these ML techniques and also foray into some advanced / esoteric details. This is also directly relevant to my current professional role. While I never need to implement a neural network from scratch, we routinely build new ML models or modify the architectures of existing ones for new applications. A deeper understanding of how the various components of the model function - while not strictly necessary - is immensely helpful. It is also a fun little side project :)
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2025-04-06 15:06:41 +0100 +0100'>April 6, 2025</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;295 words&nbsp;·&nbsp;anujkhare</footer>
-  <a class="entry-link" aria-label="post link to NN from scratch series" href="https://anujkhare.github.io/posts/000-from-scratch-series/"></a>
+  <footer class="entry-footer"><span title='2025-04-06 15:06:41 +0100 BST'>April 6, 2025</span>&nbsp;·&nbsp;2 min&nbsp;·&nbsp;295 words&nbsp;·&nbsp;anujkhare</footer>
+  <a class="entry-link" aria-label="post link to NN from scratch series" href="http://localhost:1313/posts/000-from-scratch-series/"></a>
 </article>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="https://anujkhare.github.io/">Anuj&#39;s Blog</a></span> · 
+        <span>&copy; 2025 <a href="http://localhost:1313/">Anuj&#39;s Blog</a></span> · 
 
     <span>
         Powered by
