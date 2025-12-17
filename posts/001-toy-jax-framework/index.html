@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
 <title>Toylib Jax Framework | Anuj&#39;s Blog</title>
 <meta name="keywords" content="JAX, from scratch">
 <meta name="description" content="A simple NN framework in JAX.">
 <meta name="author" content="Anuj Khare">
 <link rel="canonical" href="https://anujkhare.github.io/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.f49d66caae9ea0fd43f21f29e71a8d3e284517ed770f2aa86fa012953ad3c9ef.css" integrity="sha256-9J1myq6eoP1D8h8p5xqNPihFF&#43;13Dyqob6ASlTrTye8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<link rel="icon" href="https://anujkhare.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://anujkhare.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://anujkhare.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://anujkhare.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://anujkhare.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/001-toy-jax-framework/">
+<link rel="alternate" hreflang="en" href="https://anujkhare.github.io/posts/001-toy-jax-framework/">
 <noscript>
     <style>
         #theme-toggle,
@@ -60,7 +60,75 @@
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
     onload="renderMathInElement(document.body);"></script>
+<meta property="og:url" content="https://anujkhare.github.io/posts/001-toy-jax-framework/">
+  <meta property="og:site_name" content="Anuj&#39;s Blog">
+  <meta property="og:title" content="Toylib Jax Framework">
+  <meta property="og:description" content="A simple NN framework in JAX.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-06T17:42:57+01:00">
+    <meta property="article:modified_time" content="2025-04-06T17:42:57+01:00">
+    <meta property="article:tag" content="JAX">
+    <meta property="article:tag" content="From Scratch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Toylib Jax Framework">
+<meta name="twitter:description" content="A simple NN framework in JAX.">
 
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://anujkhare.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Toylib Jax Framework",
+      "item": "https://anujkhare.github.io/posts/001-toy-jax-framework/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Toylib Jax Framework",
+  "name": "Toylib Jax Framework",
+  "description": "A simple NN framework in JAX.",
+  "keywords": [
+    "JAX", "from scratch"
+  ],
+  "articleBody": "Let’s build yet another JAX neural networks library. Our primary aim is to keep things (relatively) simple and transparent and progressively building up complexity. Why build a library at all? Reuse - as we build more complex networks, it is important to have building blocks we can rely upon. The goal is not to compete with Flax or Haiku — but to rebuild their core ideas from scratch.\nI have been greatly inspired by the design of equinox. Quoting from their Github page:\nneural networks (or more generally any model), with easy-to-use PyTorch-like syntax; filtered APIs for transformations; useful PyTree manipulation routines; advanced features like runtime errors; and best of all, equinox isn’t a framework: everything you write in equinox is compatible with anything else in JAX or the ecosystem. This is very close to my ideal library for sticking as close as possible to the core JAX functionality. Having said that, equinox is still a feature complete library that holds its own against the likes of Flax and PyTorch. We aim for a much simpler version inspired by equinox with no bells and whistles.\nJAX transforms work very well with Pytrees. It is a natural choice then to represent all our model parameters as a Pytrees. An MLP with a couple of linear layers could be represented something like:\nparams = { 'layer1': { 'w': [0, 0, 1, 2], 'b': [1] }, 'layer2': { 'w': [-1, 2, 0, 3], 'b': [-1] }, } This is simple and works natively with JAX transforms, but this will quickly get out of hand as we develop more nested components.\nSo, we try to come up with the Module abstraction. The Module is still a Pytree node, with:\ntrainable fields for parameters (weights, biases, etc.) static fields for metadata (like hidden sizes, name scopes, etc.) nested modules to enable composition compatibility with jax.jit, jax.grad, etc. import jax import jaxtyping import math import numpy as np import typing We set up a simple linear regression in N variables. Analytic solutions exist for this problem, but we use this as the first toy example as we build up toylib!\n# Problem setup n = 120 # examples d = 10 # dimensions # Generate some dummy data np.random.seed(31) xs = np.random.normal(size=(n, d)) weights_true = np.random.randint(0, 10, size=(d,)) ys = np.dot(xs, weights_true) + np.random.normal(size=(n,)) xs_train, xs_test = xs[:100], xs[100:] ys_train, ys_test = ys[:100], ys[100:] print(weights_true) [5 2 7 0 8 1 3 6 4 1] Let’s define a linear layer that does a single matrix multiplication and optionally adds a bias.\nclass Module: pass class Linear(Module): \"\"\"Defines a simple feedforward layer: which is a linear transformation. \"\"\" # Trainable parameters weights: jaxtyping.Array bias: typing.Optional[jaxtyping.Array] # Hyperparameters / metadata in_features: int out_features: int use_bias: bool def __init__(self, in_features: int, out_features: int, use_bias: bool = True, *, key: jaxtyping.PRNGKeyArray) -\u003e None: # Split the random key for weights and bias w_key, b_key = jax.random.split(key, 2) # We initialize the weights with a uniform distribution lim = 1 / math.sqrt(in_features) self.weights = jax.random.uniform(w_key, (in_features, out_features), minval=-lim, maxval=lim) if use_bias: self.bias = jax.random.uniform(b_key, (out_features,), minval=-lim, maxval=lim) self.in_features = in_features self.out_features = out_features self.use_bias = use_bias self.key = key def __call__(self, x: jaxtyping.Array) -\u003e jaxtyping.Array: x = jax.numpy.dot(x, self.weights) if self.use_bias: x = x + self.bias return x Let’s initialize a linear layer to match our data and do a simple forward pass.\nmodel = Linear(d, 1, use_bias=True, key=jax.random.PRNGKey(0)) y_pred = model(xs_train) print(y_pred.shape) (100, 1) Looks good so far, let’s define a loss function. We use the L2 loss (mean squared error) here. Further, let’s run this with JAX’s value_and_grad function which we would utilize to compute the loss value and model gradients.\ndef loss_function(model, xs, ys): preds = jax.numpy.squeeze(model(xs)) return jax.numpy.mean((ys - preds) ** 2) # L2 Loss print(loss_function(model, xs_train, ys_train)) jax.value_and_grad(loss_function)(model, xs_train, ys_train) 176.39902 .../lib/python3.9/site-packages/jax/_src/dispatch.py:282, in check_arg(arg) 280 def check_arg(arg: Any): 281 if not (isinstance(arg, core.Tracer) or core.valid_jaxtype(arg)): --\u003e 282 raise TypeError(f\"Argument '{arg}' of type {type(arg)} is not a valid \" 283 \"JAX type.\") TypeError: Argument '\u003c__main__.Linear object at 0x120f651c0\u003e' of type ",
+  "wordCount" : "1922",
+  "inLanguage": "en",
+  "datePublished": "2025-04-06T17:42:57+01:00",
+  "dateModified": "2025-04-06T17:42:57+01:00",
+  "author":{
+    "@type": "Person",
+    "name": "Anuj Khare"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://anujkhare.github.io/posts/001-toy-jax-framework/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Anuj's Blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://anujkhare.github.io/favicon.ico"
+    }
+  }
+}
+</script>
 </head>
 
 <body class="" id="top">
@@ -78,7 +146,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="Anuj&#39;s Blog (Alt + H)">Anuj&#39;s Blog</a>
+            <a href="https://anujkhare.github.io/" accesskey="h" title="Anuj&#39;s Blog (Alt + H)">Anuj&#39;s Blog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -110,7 +178,7 @@
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <div class="breadcrumbs"><a href="https://anujkhare.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://anujkhare.github.io/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
       Toylib Jax Framework
     </h1>
@@ -483,16 +551,11 @@ All jax transforms will serialize our class using this function, operate on the 
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/tags/jax/">Jax</a></li>
-      <li><a href="http://localhost:1313/tags/from-scratch/">From Scratch</a></li>
+      <li><a href="https://anujkhare.github.io/tags/jax/">JAX</a></li>
+      <li><a href="https://anujkhare.github.io/tags/from-scratch/">From Scratch</a></li>
     </ul>
 <nav class="paginav">
-  <a class="prev" href="http://localhost:1313/posts/002-text-classification-attention/">
-    <span class="title">« Prev</span>
-    <br>
-    <span>Attention? Simple text classification with attention!</span>
-  </a>
-  <a class="next" href="http://localhost:1313/posts/000-from-scratch-series/">
+  <a class="next" href="https://anujkhare.github.io/posts/000-from-scratch-series/">
     <span class="title">Next »</span>
     <br>
     <span>NN from scratch series</span>
@@ -504,7 +567,7 @@ All jax transforms will serialize our class using this function, operate on the 
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/">Anuj&#39;s Blog</a></span> · 
+        <span>&copy; 2025 <a href="https://anujkhare.github.io/">Anuj&#39;s Blog</a></span> · 
 
     <span>
         Powered by
