@@ -6,8 +6,15 @@
     <description>Recent content in From Scratch on Anuj&#39;s Blog</description>
     <generator>Hugo -- 0.145.0</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 06 Apr 2025 17:42:57 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 12:00:00 -0800</lastBuildDate>
     <atom:link href="https://anujkhare.github.io/tags/from-scratch/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Why does a CNN work?</title>
+      <link>https://anujkhare.github.io/posts/004-why-does-a-cnn-work/</link>
+      <pubDate>Sun, 01 Nov 2026 12:00:00 -0800</pubDate>
+      <guid>https://anujkhare.github.io/posts/004-why-does-a-cnn-work/</guid>
+      <description>From a linear model to a ResNet on Imagenette, looking inside at each step.</description>
+    </item>
     <item>
       <title>Toylib Jax Framework</title>
       <link>https://anujkhare.github.io/posts/001-toy-jax-framework/</link>
